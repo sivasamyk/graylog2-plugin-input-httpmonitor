@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import com.jayway.jsonpath.spi.mapper.MappingException;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.Realm;
 import com.ning.http.client.Response;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
@@ -58,6 +60,7 @@ public class HttpMonitorTransport implements Transport {
     private final MetricRegistry metricRegistry;
     private ServerStatus serverStatus;
     private ScheduledExecutorService executorService;
+    private ScheduledFuture future;
     private MessageInput messageInput;
 
     @AssistedInject
@@ -105,6 +108,11 @@ public class HttpMonitorTransport implements Transport {
 
     @Override
     public void stop() {
+
+        if (future != null) {
+            future.cancel(true);
+        }
+
         if (executorService != null) {
             executorService.shutdownNow();
         }
@@ -112,7 +120,8 @@ public class HttpMonitorTransport implements Transport {
 
     private void startMonitoring(URLMonitorConfig config) {
         executorService = Executors.newSingleThreadScheduledExecutor();
-        executorService.scheduleAtFixedRate(new MonitorTask(config, messageInput), 0,
+        long initalDelay = Math.round(Math.random() * 60);
+        future = executorService.scheduleAtFixedRate(new MonitorTask(config, messageInput), initalDelay,
                 config.getExecutionInterval() * 60, TimeUnit.SECONDS);
     }
 
@@ -143,7 +152,7 @@ public class HttpMonitorTransport implements Transport {
 
                 long startTime = System.currentTimeMillis();
                 long time = -1;
-                boolean timeout = false;
+                boolean status = false;
 
                 Map<String, Object> eventdata = Maps.newHashMap();
                 eventdata.put("version", "1.1");
@@ -151,6 +160,7 @@ public class HttpMonitorTransport implements Transport {
                 eventdata.put("_label", config.getLabel());
                 try {
                     Response response = builder.execute().get(config.getTimeout(), TimeUnit.SECONDS);
+                    status = true;
                     long endTime = System.currentTimeMillis();
                     time = endTime - startTime;
                     eventdata.put("host", response.getUri().getHost());
@@ -166,12 +176,20 @@ public class HttpMonitorTransport implements Transport {
                             eventdata.put("_" + header, response.getHeader(header));
                         }
                     }
+                } catch (IOException | ExecutionException e) {
+                    LOGGER.debug("Exception while executing request for URL " + config.getUrl(), e);
+                    eventdata.put("host", new URL(config.getUrl()).getHost());
+                    eventdata.put("short_message", "Request failed :" + e.getMessage());
+                    eventdata.put("_status", 999);
                 } catch (TimeoutException e) {
-                    LOGGER.debug("Timeout while executing request for URL " + config.getUrl(), e);
-                    eventdata.put("_time", -1);
+                    LOGGER.debug("Exception while executing request for URL " + config.getUrl(), e);
+                    eventdata.put("host", new URL(config.getUrl()).getHost());
+                    eventdata.put("short_message", "Request failed :" + e.getMessage());
+                    eventdata.put("_status", 998);
+                    long endTime = System.currentTimeMillis();
+                    time = endTime - startTime;
                 }
                 eventdata.put("_time", time);
-                eventdata.put("_timeout", timeout);
 
                 //publish to graylog server
                 ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
@@ -179,7 +197,7 @@ public class HttpMonitorTransport implements Transport {
                 messageInput.processRawMessage(new RawMessage(byteStream.toByteArray()));
                 byteStream.close();
 
-            } catch (InterruptedException | ExecutionException | IOException e) {
+            } catch (InterruptedException | IOException e ) {
                 LOGGER.error("Exception while executing request for URL " + config.getUrl(), e);
             }
         }
