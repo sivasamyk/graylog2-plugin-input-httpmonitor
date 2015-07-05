@@ -1,18 +1,30 @@
-# Graylog HttpMonitorInput Plugin
+# Graylog Http Monitor Input Plugin
 
-Welcome to your new Graylog plugin!
+An input monitor plugin for monitoring HTTP URLs (websites and REST APIs). 
+Works by periodically polling the URLs and recording the responses as messages. 
 
-Please refer to http://docs.graylog.org/en/latest/pages/plugins.html for documentation on how to write
-plugins for Graylog.
+This plugin provides support for monitoring following parameters
 
+* Response time
+* HTTP Status Code
+* HTTP Status Text
+* HTTP Response Body
+* Timeouts and connection failures
+* Custom Response Headers
 
 Getting started
 ---------------
 
-This project is using Maven 3 and requires Java 7 or higher. The plugin will require Graylog 1.0.0 or higher.
+To start using this plugin place this jar in the plugins directory of graylog server. 
 
-* Clone this repository.
-* Run `mvn package` to build a JAR file.
-* Optional: Run `mvn jdeb:jdeb` and `mvn rpm:rpm` to create a DEB and RPM package respectively.
-* Copy generated JAR file in target directory to your Graylog plugin directory.
-* Restart the Graylog.
+Following parameters can be configured while launching the plugin
+
+* URL to monitor ( supports HTTPS URLs with self-signed certificates also)
+* Polling interval - Interval in minutes to execute the HTTP methods
+* Timeout - Time in seconds to wait before declaring the request as timed out
+* HTTP Method - GET/POST/PUT method to be executed
+* Additional HTTP headers to send - Comma separated list of HTTP request headers to be sent as part of request. e.g. CAccept:application/json, X-Requester:Graylog2
+* Additional HTTP headers to log - Command separated list of HTTP response headers to log as part of message. e.g. Expires,Date
+* HTTP Basic Authentication username and password
+
+The status code will be 999 on connection failures and 998 on connection timeouts. 

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import com.jayway.jsonpath.spi.mapper.MappingException;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.Realm;
 import com.ning.http.client.Response;
@@ -152,7 +151,6 @@ public class HttpMonitorTransport implements Transport {
 
                 long startTime = System.currentTimeMillis();
                 long time = -1;
-                boolean status = false;
 
                 Map<String, Object> eventdata = Maps.newHashMap();
                 eventdata.put("version", "1.1");
@@ -160,7 +158,6 @@ public class HttpMonitorTransport implements Transport {
                 eventdata.put("_label", config.getLabel());
                 try {
                     Response response = builder.execute().get(config.getTimeout(), TimeUnit.SECONDS);
-                    status = true;
                     long endTime = System.currentTimeMillis();
                     time = endTime - startTime;
                     eventdata.put("host", response.getUri().getHost());
@@ -176,13 +173,13 @@ public class HttpMonitorTransport implements Transport {
                             eventdata.put("_" + header, response.getHeader(header));
                         }
                     }
-                } catch (IOException | ExecutionException e) {
+                } catch (IOException e) {
                     LOGGER.debug("Exception while executing request for URL " + config.getUrl(), e);
                     eventdata.put("host", new URL(config.getUrl()).getHost());
                     eventdata.put("short_message", "Request failed :" + e.getMessage());
                     eventdata.put("_status", 999);
                 } catch (TimeoutException e) {
-                    LOGGER.debug("Exception while executing request for URL " + config.getUrl(), e);
+                    LOGGER.debug("Timeout while executing request for URL " + config.getUrl(), e);
                     eventdata.put("host", new URL(config.getUrl()).getHost());
                     eventdata.put("short_message", "Request failed :" + e.getMessage());
                     eventdata.put("_status", 998);
@@ -197,7 +194,7 @@ public class HttpMonitorTransport implements Transport {
                 messageInput.processRawMessage(new RawMessage(byteStream.toByteArray()));
                 byteStream.close();
 
-            } catch (InterruptedException | IOException e ) {
+            } catch (InterruptedException | ExecutionException | IOException e ) {
                 LOGGER.error("Exception while executing request for URL " + config.getUrl(), e);
             }
         }
@@ -284,7 +281,7 @@ public class HttpMonitorTransport implements Transport {
             cr.addField(new TextField(CK_CONFIG_HEADERS_TO_SEND,
                     "Additional HTTP headers",
                     "",
-                    "Add a comma separated list of additional HTTP headers. For example: Accept: application/json, X-Requester: Graylog2",
+                    "Add a comma separated list of additional HTTP headers to send. For example: Accept: application/json, X-Requester: Graylog2",
                     ConfigurationField.Optional.OPTIONAL));
 
             cr.addField(new TextField(CK_CONFIG_USER_NAME,
