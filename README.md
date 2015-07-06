@@ -16,7 +16,7 @@ This plugin provides support for monitoring following parameters
 Getting started
 ---------------
 
-To start using this plugin place this jar in the plugins directory of graylog server. 
+To start using this plugin place this [jar] (https://github.com/sivasamyk/graylog2-plugin-input-httpmonitor/blob/master/graylog2-plugin-input-httpmonitor-1.0.0.jar) in the plugins directory of graylog server. 
 
 Following parameters can be configured while launching the plugin
 
@@ -29,3 +29,8 @@ Following parameters can be configured while launching the plugin
 * HTTP Basic Authentication username and password
 
 The status code will be 999 on connection failures and 998 on connection timeouts. 
+
+Sample Dashboard
+----------------
+
+![Dashboard for Hacker News Monitor] (https://raw.githubusercontent.com/sivasamyk/graylog2-plugin-input-httpmonitor/master/HTTP%20Monitor%20Screenshot.png)
