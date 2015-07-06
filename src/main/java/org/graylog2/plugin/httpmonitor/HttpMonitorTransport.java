@@ -13,10 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.graylog2.plugin.ServerStatus;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
-import org.graylog2.plugin.configuration.fields.ConfigurationField;
-import org.graylog2.plugin.configuration.fields.DropdownField;
-import org.graylog2.plugin.configuration.fields.NumberField;
-import org.graylog2.plugin.configuration.fields.TextField;
+import org.graylog2.plugin.configuration.fields.*;
 import org.graylog2.plugin.inputs.MessageInput;
 import org.graylog2.plugin.inputs.MisfireException;
 import org.graylog2.plugin.inputs.annotations.ConfigClass;
@@ -29,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,6 +48,7 @@ public class HttpMonitorTransport implements Transport {
     private static final String CK_CONFIG_TIMEOUT = "configTimeout";
     private static final String CK_CONFIG_INTERVAL = "configInterval";
     private static final String CK_CONFIG_HEADERS_TO_RECORD = "configHeadersToRecord";
+    private static final String CK_CONFIG_LOG_RESPONSE_BODY = "configLogResponseBody";
 
     private static final String METHOD_POST = "POST";
     private static final String METHOD_HEAD = "HEAD";
@@ -95,6 +94,7 @@ public class HttpMonitorTransport implements Transport {
         urlMonitorConfig.setExecutionInterval(configuration.getInt(CK_CONFIG_INTERVAL));
         urlMonitorConfig.setTimeout(configuration.getInt(CK_CONFIG_TIMEOUT));
         urlMonitorConfig.setRequestBody(configuration.getString(CK_CONFIG_REQUEST_BODY));
+        urlMonitorConfig.setLogResponseBody(configuration.getBoolean(CK_CONFIG_LOG_RESPONSE_BODY));
 
         String responseHeaders = configuration.getString(CK_CONFIG_HEADERS_TO_RECORD);
         if (StringUtils.isNotEmpty(responseHeaders)) {
@@ -164,7 +164,10 @@ public class HttpMonitorTransport implements Transport {
                     eventdata.put("_status", response.getStatusCode());
                     eventdata.put("_statusLine", response.getStatusText());
                     String responseBodyStr = new String(response.getResponseBodyAsBytes());
-                    eventdata.put("full_message", responseBodyStr);
+                    eventdata.put("_size",responseBodyStr.length());
+                    if (config.isLogResponseBody()) {
+                        eventdata.put("full_message", responseBodyStr);
+                    }
                     String shortMessage = responseBodyStr.length() > 50 ? responseBodyStr.substring(0, 50) :
                             responseBodyStr;
                     eventdata.put("short_message", shortMessage);
@@ -173,20 +176,25 @@ public class HttpMonitorTransport implements Transport {
                             eventdata.put("_" + header, response.getHeader(header));
                         }
                     }
-                } catch (IOException e) {
-                    LOGGER.debug("Exception while executing request for URL " + config.getUrl(), e);
+                } catch (ExecutionException e) {
                     eventdata.put("host", new URL(config.getUrl()).getHost());
                     eventdata.put("short_message", "Request failed :" + e.getMessage());
-                    eventdata.put("_status", 999);
-                } catch (TimeoutException e) {
-                    LOGGER.debug("Timeout while executing request for URL " + config.getUrl(), e);
-                    eventdata.put("host", new URL(config.getUrl()).getHost());
-                    eventdata.put("short_message", "Request failed :" + e.getMessage());
-                    eventdata.put("_status", 998);
+                    eventdata.put("_size",0);
                     long endTime = System.currentTimeMillis();
                     time = endTime - startTime;
+                    //In case of connection timeout we get an execution exception with root cause as timeoutexception
+                    if (e.getCause() instanceof TimeoutException) {
+                        LOGGER.debug("Timeout while executing request for URL " + config.getUrl(), e);
+                        eventdata.put("_status", 998);
+                    } else if (e.getCause() instanceof ConnectException) {
+                        //In case of connect exception we get an execution exception with root cause as connectexception
+                        LOGGER.debug("Exception while executing request for URL " + config.getUrl(), e);
+                        eventdata.put("_status", 999);
+                    } else {
+                        throw e;
+                    }
                 }
-                eventdata.put("_time", time);
+                eventdata.put("_responseTime", time);
 
                 //publish to graylog server
                 ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
@@ -194,7 +202,7 @@ public class HttpMonitorTransport implements Transport {
                 messageInput.processRawMessage(new RawMessage(byteStream.toByteArray()));
                 byteStream.close();
 
-            } catch (InterruptedException | ExecutionException | IOException e ) {
+            } catch (InterruptedException | TimeoutException | ExecutionException | IOException e) {
                 LOGGER.error("Exception while executing request for URL " + config.getUrl(), e);
             }
         }
@@ -312,6 +320,11 @@ public class HttpMonitorTransport implements Transport {
                     "",
                     "Comma separated response headers to log. For example: Accept,Server,Expires",
                     ConfigurationField.Optional.OPTIONAL));
+
+            cr.addField(new BooleanField(CK_CONFIG_LOG_RESPONSE_BODY,
+                    "Log full response body",
+                    false,
+                    "Select if the complete response body needs to be logged as part of message"));
 
             return cr;
         }

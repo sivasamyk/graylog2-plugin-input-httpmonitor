@@ -12,6 +12,7 @@ public class URLMonitorConfig {
     private String username,password;
     private int timeout, executionInterval;
     private String[] responseHeadersToRecord;
+    private boolean logResponseBody;
 
     public String getUrl() {
         return url;
@@ -99,5 +100,13 @@ public class URLMonitorConfig {
 
     public void setResponseHeadersToRecord(String[] responseHeadersToRecord) {
         this.responseHeadersToRecord = responseHeadersToRecord;
+    }
+
+    public boolean isLogResponseBody() {
+        return logResponseBody;
+    }
+
+    public void setLogResponseBody(boolean logResponseBody) {
+        this.logResponseBody = logResponseBody;
     }
 }

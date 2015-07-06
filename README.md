@@ -5,10 +5,11 @@ Works by periodically polling the URLs and recording the responses as messages.
 
 This plugin provides support for monitoring following parameters
 
-* Response time
+* Response time in milliseconds
 * HTTP Status Code
 * HTTP Status Text
 * HTTP Response Body
+* HTTP Response size in bytes
 * Timeouts and connection failures
 * Custom Response Headers
 
