@@ -16,7 +16,7 @@ This plugin provides support for monitoring following parameters
 Getting started
 ---------------
 
-To start using this plugin place this [jar] (https://github.com/sivasamyk/graylog2-plugin-input-httpmonitor/blob/master/graylog2-plugin-input-httpmonitor-1.0.0.jar) in the plugins directory of graylog server. 
+To start using this plugin place this [jar] (https://github.com/sivasamyk/graylog2-plugin-input-httpmonitor/raw/master/graylog2-plugin-input-httpmonitor-1.0.0.jar) in the plugins directory of graylog server. 
 
 Following parameters can be configured while launching the plugin
 
