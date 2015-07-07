@@ -1,6 +1,7 @@
 package org.graylog2.plugin.httpmonitor;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created on 17/6/15.
@@ -13,6 +14,7 @@ public class URLMonitorConfig {
     private int timeout, executionInterval;
     private String[] responseHeadersToRecord;
     private boolean logResponseBody;
+    private TimeUnit intervalUnit,timeoutUnit;
 
     public String getUrl() {
         return url;
@@ -108,5 +110,21 @@ public class URLMonitorConfig {
 
     public void setLogResponseBody(boolean logResponseBody) {
         this.logResponseBody = logResponseBody;
+    }
+
+    public TimeUnit getIntervalUnit() {
+        return intervalUnit;
+    }
+
+    public void setIntervalUnit(TimeUnit intervalUnit) {
+        this.intervalUnit = intervalUnit;
+    }
+
+    public TimeUnit getTimeoutUnit() {
+        return timeoutUnit;
+    }
+
+    public void setTimeoutUnit(TimeUnit timeoutUnit) {
+        this.timeoutUnit = timeoutUnit;
     }
 }

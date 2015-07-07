@@ -28,6 +28,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
@@ -46,7 +47,9 @@ public class HttpMonitorTransport implements Transport {
     private static final String CK_CONFIG_USER_NAME = "configUsername";
     private static final String CK_CONFIG_PASSWORD = "configPassword";
     private static final String CK_CONFIG_TIMEOUT = "configTimeout";
+    private static final String CK_CONFIG_TIMEOUT_UNIT = "configTimeoutUnit";
     private static final String CK_CONFIG_INTERVAL = "configInterval";
+    private static final String CK_CONFIG_INTERVAL_UNIT = "configIntervalUnit";
     private static final String CK_CONFIG_HEADERS_TO_RECORD = "configHeadersToRecord";
     private static final String CK_CONFIG_LOG_RESPONSE_BODY = "configLogResponseBody";
 
@@ -93,6 +96,19 @@ public class HttpMonitorTransport implements Transport {
         urlMonitorConfig.setPassword(configuration.getString(CK_CONFIG_PASSWORD));
         urlMonitorConfig.setExecutionInterval(configuration.getInt(CK_CONFIG_INTERVAL));
         urlMonitorConfig.setTimeout(configuration.getInt(CK_CONFIG_TIMEOUT));
+        urlMonitorConfig.setTimeoutUnit(TimeUnit.valueOf(configuration.getString(CK_CONFIG_TIMEOUT_UNIT)));
+        urlMonitorConfig.setIntervalUnit(TimeUnit.valueOf(configuration.getString(CK_CONFIG_INTERVAL_UNIT)));
+
+//        long timoutInMs = TimeUnit.MILLISECONDS.convert(urlMonitorConfig.getTimeout(), urlMonitorConfig.getTimeoutUnit());
+//        long intervalInMs = TimeUnit.MILLISECONDS.convert(urlMonitorConfig.getExecutionInterval(), urlMonitorConfig.getIntervalUnit());
+//
+//        if (intervalInMs <= timoutInMs) {
+//            String message = MessageFormat.format("Timeout {0} {1} should be smaller than interval {2} {3}",
+//                    urlMonitorConfig.getTimeout(),urlMonitorConfig.getTimeoutUnit(),
+//                    urlMonitorConfig.getExecutionInterval(), urlMonitorConfig.getIntervalUnit());
+//            throw new MisfireException(message);
+//        }
+
         urlMonitorConfig.setRequestBody(configuration.getString(CK_CONFIG_REQUEST_BODY));
         urlMonitorConfig.setLogResponseBody(configuration.getBoolean(CK_CONFIG_LOG_RESPONSE_BODY));
 
@@ -119,9 +135,10 @@ public class HttpMonitorTransport implements Transport {
 
     private void startMonitoring(URLMonitorConfig config) {
         executorService = Executors.newSingleThreadScheduledExecutor();
-        long initalDelay = Math.round(Math.random() * 60);
-        future = executorService.scheduleAtFixedRate(new MonitorTask(config, messageInput), initalDelay,
-                config.getExecutionInterval() * 60, TimeUnit.SECONDS);
+        long initalDelayMs = TimeUnit.MILLISECONDS.convert(Math.round(Math.random() * 60), TimeUnit.SECONDS);
+        long executionIntervalMs = TimeUnit.MILLISECONDS.convert(config.getExecutionInterval(), config.getIntervalUnit());
+        future = executorService.scheduleAtFixedRate(new MonitorTask(config, messageInput), initalDelayMs,
+                executionIntervalMs, TimeUnit.MILLISECONDS);
     }
 
 
@@ -157,14 +174,14 @@ public class HttpMonitorTransport implements Transport {
                 eventdata.put("_url", config.getUrl());
                 eventdata.put("_label", config.getLabel());
                 try {
-                    Response response = builder.execute().get(config.getTimeout(), TimeUnit.SECONDS);
+                    Response response = builder.execute().get(config.getTimeout(), config.getTimeoutUnit());
                     long endTime = System.currentTimeMillis();
                     time = endTime - startTime;
                     eventdata.put("host", response.getUri().getHost());
                     eventdata.put("_status", response.getStatusCode());
                     eventdata.put("_statusLine", response.getStatusText());
                     String responseBodyStr = new String(response.getResponseBodyAsBytes());
-                    eventdata.put("_size",responseBodyStr.length());
+                    eventdata.put("_size", responseBodyStr.length());
                     if (config.isLogResponseBody()) {
                         eventdata.put("full_message", responseBodyStr);
                     }
@@ -179,7 +196,7 @@ public class HttpMonitorTransport implements Transport {
                 } catch (ExecutionException e) {
                     eventdata.put("host", new URL(config.getUrl()).getHost());
                     eventdata.put("short_message", "Request failed :" + e.getMessage());
-                    eventdata.put("_size",0);
+                    eventdata.put("_size", 0);
                     long endTime = System.currentTimeMillis();
                     time = endTime - startTime;
                     //In case of connection timeout we get an execution exception with root cause as timeoutexception
@@ -307,13 +324,37 @@ public class HttpMonitorTransport implements Transport {
             cr.addField(new NumberField(CK_CONFIG_INTERVAL,
                     "Interval",
                     1,
-                    "Time in minutes between requests",
+                    "Time between between requests",
                     ConfigurationField.Optional.NOT_OPTIONAL));
+
+            Map<String, String> timeUnits = DropdownField.ValueTemplates.timeUnits();
+            //Do not add nano seconds and micro seconds
+            timeUnits.remove(TimeUnit.NANOSECONDS.toString());
+            timeUnits.remove(TimeUnit.MICROSECONDS.toString());
+
+            cr.addField(new DropdownField(
+                    CK_CONFIG_INTERVAL_UNIT,
+                    "Interval time unit",
+                    TimeUnit.MINUTES.toString(),
+                    timeUnits,
+                    ConfigurationField.Optional.NOT_OPTIONAL
+            ));
+
+
             cr.addField(new NumberField(CK_CONFIG_TIMEOUT,
                     "Timeout",
                     20,
-                    "Timeout in seconds for requests",
+                    "Timeout for requests",
                     ConfigurationField.Optional.NOT_OPTIONAL));
+
+            cr.addField(new DropdownField(
+                    CK_CONFIG_TIMEOUT_UNIT,
+                    "Timeout time unit",
+                    TimeUnit.SECONDS.toString(),
+                    timeUnits,
+                    ConfigurationField.Optional.NOT_OPTIONAL
+            ));
+
 
             cr.addField(new TextField(CK_CONFIG_HEADERS_TO_RECORD,
                     "Response headers to log",
