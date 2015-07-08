@@ -1,4 +1,4 @@
-# Graylog Http Monitor Input Plugin
+# Graylog HTTP Monitor Input Plugin
 
 An input monitor plugin for monitoring HTTP URLs (websites and REST APIs). 
 Works by periodically polling the URLs and recording the responses as messages. 
