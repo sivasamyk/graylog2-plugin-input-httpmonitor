@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.PerRequestConfig;
 import com.ning.http.client.Realm;
 import com.ning.http.client.Response;
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +29,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.URL;
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
@@ -151,30 +151,30 @@ public class HttpMonitorTransport implements Transport {
         private URLMonitorConfig config;
         private MessageInput messageInput;
         private ObjectMapper mapper;
+        private AsyncHttpClient httpClient;
+        private AsyncHttpClient.BoundRequestBuilder requestBuilder;
 
         public MonitorTask(URLMonitorConfig config, MessageInput messageInput) {
             this.config = config;
             this.messageInput = messageInput;
             this.mapper = new ObjectMapper();
+            httpClient = new AsyncHttpClient();
+            buildRequest();
         }
 
         @Override
         public void run() {
-            AsyncHttpClient client = new AsyncHttpClient();
-            AsyncHttpClient.BoundRequestBuilder builder = buildRequest(client);
-
             //send to http server
             try {
 
                 long startTime = System.currentTimeMillis();
-                long time = -1;
-
+                long time;
                 Map<String, Object> eventdata = Maps.newHashMap();
                 eventdata.put("version", "1.1");
                 eventdata.put("_url", config.getUrl());
                 eventdata.put("_label", config.getLabel());
                 try {
-                    Response response = builder.execute().get(config.getTimeout(), config.getTimeoutUnit());
+                    Response response = requestBuilder.execute().get();
                     long endTime = System.currentTimeMillis();
                     time = endTime - startTime;
                     eventdata.put("host", response.getUri().getHost());
@@ -219,33 +219,32 @@ public class HttpMonitorTransport implements Transport {
                 messageInput.processRawMessage(new RawMessage(byteStream.toByteArray()));
                 byteStream.close();
 
-            } catch (InterruptedException | TimeoutException | ExecutionException | IOException e) {
+            } catch (InterruptedException | ExecutionException | IOException e) {
                 LOGGER.error("Exception while executing request for URL " + config.getUrl(), e);
             }
         }
 
-        private AsyncHttpClient.BoundRequestBuilder buildRequest(AsyncHttpClient client) {
-            AsyncHttpClient.BoundRequestBuilder builder = null;
+        private void buildRequest() {
 
             //Build request object
             if (METHOD_POST.equals(config.getMethod())) {
-                builder = client.preparePost(config.getUrl());
+                requestBuilder = httpClient.preparePost(config.getUrl());
             } else if (METHOD_PUT.equals(config.getMethod())) {
-                builder = client.preparePut(config.getUrl());
+                requestBuilder = httpClient.preparePut(config.getUrl());
             } else if (METHOD_HEAD.equals(config.getMethod())) {
-                builder = client.prepareHead(config.getUrl());
+                requestBuilder = httpClient.prepareHead(config.getUrl());
             } else {
-                builder = client.prepareGet(config.getUrl());
+                requestBuilder = httpClient.prepareGet(config.getUrl());
             }
 
             if (StringUtils.isNotEmpty(config.getRequestBody())) {
-                builder.setBody(config.getRequestBody());
+                requestBuilder.setBody(config.getRequestBody());
             }
 
             if (config.getRequestHeadersToSend() != null) {
                 for (String header : config.getRequestHeadersToSend()) {
                     String tokens[] = header.split(":");
-                    builder.setHeader(tokens[0], tokens[1]);
+                    requestBuilder.setHeader(tokens[0], tokens[1]);
                 }
             }
 
@@ -255,10 +254,11 @@ public class HttpMonitorTransport implements Transport {
                         .setPrincipal(config.getUsername())
                         .setPassword(config.getPassword())
                         .setScheme(Realm.AuthScheme.BASIC).build();
-                builder.setRealm(realm);
+                requestBuilder.setRealm(realm);
             }
 
-            return builder;
+            int timeoutInMs = (int)TimeUnit.MILLISECONDS.convert(config.getTimeout(),config.getTimeoutUnit());
+            requestBuilder.setPerRequestConfig(new PerRequestConfig(null,timeoutInMs));
         }
     }
 
