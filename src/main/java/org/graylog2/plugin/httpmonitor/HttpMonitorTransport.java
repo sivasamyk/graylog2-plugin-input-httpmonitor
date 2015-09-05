@@ -7,7 +7,6 @@ import com.google.common.collect.Maps;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.PerRequestConfig;
 import com.ning.http.client.Realm;
 import com.ning.http.client.Response;
 import org.apache.commons.lang3.StringUtils;
@@ -258,7 +257,7 @@ public class HttpMonitorTransport implements Transport {
             }
 
             int timeoutInMs = (int)TimeUnit.MILLISECONDS.convert(config.getTimeout(),config.getTimeoutUnit());
-            requestBuilder.setPerRequestConfig(new PerRequestConfig(null,timeoutInMs));
+            requestBuilder.setRequestTimeout(timeoutInMs);
         }
     }
 
