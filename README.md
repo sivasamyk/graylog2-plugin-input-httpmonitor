@@ -16,13 +16,14 @@ This plugin provides support for monitoring following parameters
 Getting started
 ---------------
 
-For Graylog v1.2 and above download this jar[https://github.com/sivasamyk/graylog2-plugin-input-httpmonitor/releases/download/v1.0.1/graylog2-plugin-input-httpmonitor-1.0.1.jar].
-For Graylog v1.1 and below download this jar[https://github.com/sivasamyk/graylog2-plugin-input-httpmonitor/releases/download/v1.0.0/graylog2-plugin-input-httpmonitor-1.0.0.jar].
+For Graylog v1.2 and above download this [jar] (https://github.com/sivasamyk/graylog2-plugin-input-httpmonitor/releases/download/v1.0.1/graylog2-plugin-input-httpmonitor-1.0.1.jar)
+
+For Graylog v1.1 and below download this [jar] (https://github.com/sivasamyk/graylog2-plugin-input-httpmonitor/releases/download/v1.0.0/graylog2-plugin-input-httpmonitor-1.0.0.jar)
 
 * Shutdown the graylog server.
 * Place the plugin jar in the Graylog plugins directory.
 * Restart the server.
-* In the graylog web UI, goto Systems->Inputs to launch new input of type 'HTTP Monitor'
+* In the graylog web UI, goto System->Inputs to launch new input of type 'HTTP Monitor'
  
 
 Following parameters can be configured while launching the plugin
