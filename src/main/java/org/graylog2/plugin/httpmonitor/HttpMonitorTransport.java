@@ -207,7 +207,9 @@ public class HttpMonitorTransport implements Transport {
                         LOGGER.debug("Exception while executing request for URL " + config.getUrl(), e);
                         eventdata.put("_status", 999);
                     } else {
-                        throw e;
+                        //Any other exception..
+                        LOGGER.debug("Exception while executing request for URL " + config.getUrl(), e);
+                        eventdata.put("_status", 997);
                     }
                 }
                 eventdata.put("_responseTime", time);
@@ -218,7 +220,7 @@ public class HttpMonitorTransport implements Transport {
                 messageInput.processRawMessage(new RawMessage(byteStream.toByteArray()));
                 byteStream.close();
 
-            } catch (InterruptedException | ExecutionException | IOException e) {
+            } catch (InterruptedException | IOException e) {
                 LOGGER.error("Exception while executing request for URL " + config.getUrl(), e);
             }
         }
