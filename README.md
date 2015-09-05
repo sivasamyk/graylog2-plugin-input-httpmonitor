@@ -16,7 +16,14 @@ This plugin provides support for monitoring following parameters
 Getting started
 ---------------
 
-To start using this plugin place this [jar] (https://github.com/sivasamyk/graylog2-plugin-input-httpmonitor/raw/master/graylog2-plugin-input-httpmonitor-1.0.0.jar) in the plugins directory of graylog server. 
+For Graylog v1.2 and above download this jar[https://github.com/sivasamyk/graylog2-plugin-input-httpmonitor/releases/download/v1.0.1/graylog2-plugin-input-httpmonitor-1.0.1.jar].
+For Graylog v1.1 and below download this jar[https://github.com/sivasamyk/graylog2-plugin-input-httpmonitor/releases/download/v1.0.0/graylog2-plugin-input-httpmonitor-1.0.0.jar].
+
+* Shutdown the graylog server.
+* Place the plugin jar in the Graylog plugins directory.
+* Restart the server.
+* In the graylog web UI, goto Systems->Inputs to launch new input of type 'HTTP Monitor'
+ 
 
 Following parameters can be configured while launching the plugin
 
@@ -28,7 +35,7 @@ Following parameters can be configured while launching the plugin
 * Additional HTTP headers to log - Command separated list of HTTP response headers to log as part of message. e.g. Expires,Date
 * HTTP Basic Authentication username and password
 
-The status code will be 999 on connection failures and 998 on connection timeouts. 
+The status code will be 999 on connection failures, 998 on connection timeouts and 997 for others errors. 
 
 Polling interval and timeout can be configured in milliseconds/seconds/minutes/hours/days
 
