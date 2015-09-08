@@ -40,6 +40,8 @@ The status code will be 999 on connection failures, 998 on connection timeouts a
 
 Polling interval and timeout can be configured in milliseconds/seconds/minutes/hours/days
 
+You can import the [content pack](https://github.com/sivasamyk/graylog-contentpack-httpmonitor) for HTTP Monitor for prebuilt dashboard and streams.
+
 Sample Dashboard
 ----------------
 
