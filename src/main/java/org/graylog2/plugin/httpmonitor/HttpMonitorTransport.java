@@ -170,23 +170,28 @@ public class HttpMonitorTransport implements Transport {
                 long time;
                 Map<String, Object> eventdata = Maps.newHashMap();
                 eventdata.put("version", "1.1");
-                eventdata.put("_url", config.getUrl());
+                eventdata.put("_http.monitor.url", config.getUrl());
                 eventdata.put("_label", config.getLabel());
                 try {
                     Response response = requestBuilder.execute().get();
                     long endTime = System.currentTimeMillis();
                     time = endTime - startTime;
                     eventdata.put("host", response.getUri().getHost());
-                    eventdata.put("_status", response.getStatusCode());
-                    eventdata.put("_statusLine", response.getStatusText());
+                    eventdata.put("_http.monitor.status", response.getStatusCode());
+                    eventdata.put("_http.monitor.statusLine", response.getStatusText());
                     String responseBodyStr = new String(response.getResponseBodyAsBytes());
-                    eventdata.put("_size", responseBodyStr.length());
+                    eventdata.put("_http.monitor.responseSize", responseBodyStr.length());
                     if (config.isLogResponseBody()) {
                         eventdata.put("full_message", responseBodyStr);
                     }
                     String shortMessage = responseBodyStr.length() > 50 ? responseBodyStr.substring(0, 50) :
                             responseBodyStr;
+                    if (shortMessage.isEmpty()) {
+                        shortMessage = "no_response";
+                    }
                     eventdata.put("short_message", shortMessage);
+
+
                     if (config.getResponseHeadersToRecord() != null) {
                         for (String header : config.getResponseHeadersToRecord()) {
                             eventdata.put("_" + header, response.getHeader(header));
@@ -195,24 +200,24 @@ public class HttpMonitorTransport implements Transport {
                 } catch (ExecutionException e) {
                     eventdata.put("host", new URL(config.getUrl()).getHost());
                     eventdata.put("short_message", "Request failed :" + e.getMessage());
-                    eventdata.put("_size", 0);
+                    eventdata.put("_http.monitor.responseSize", 0);
                     long endTime = System.currentTimeMillis();
                     time = endTime - startTime;
                     //In case of connection timeout we get an execution exception with root cause as timeoutexception
                     if (e.getCause() instanceof TimeoutException) {
                         LOGGER.debug("Timeout while executing request for URL " + config.getUrl(), e);
-                        eventdata.put("_status", 998);
+                        eventdata.put("_http.monitor.status", 998);
                     } else if (e.getCause() instanceof ConnectException) {
                         //In case of connect exception we get an execution exception with root cause as connectexception
                         LOGGER.debug("Exception while executing request for URL " + config.getUrl(), e);
-                        eventdata.put("_status", 999);
+                        eventdata.put("_http.monitor.status", 999);
                     } else {
                         //Any other exception..
                         LOGGER.debug("Exception while executing request for URL " + config.getUrl(), e);
-                        eventdata.put("_status", 997);
+                        eventdata.put("_http.monitor.status", 997);
                     }
                 }
-                eventdata.put("_responseTime", time);
+                eventdata.put("_http.monitor.responseTime", time);
 
                 //publish to graylog server
                 ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
