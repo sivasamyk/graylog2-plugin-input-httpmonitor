@@ -16,7 +16,7 @@ This plugin provides support for monitoring following parameters
 Getting started
 ---------------
 
-For Graylog v1.2 and above download this [jar] (https://github.com/sivasamyk/graylog2-plugin-input-httpmonitor/releases/download/v1.0.1/graylog2-plugin-input-httpmonitor-1.0.1.jar)
+For Graylog v1.2 and above download this [jar] (https://github.com/sivasamyk/graylog2-plugin-input-httpmonitor/releases/download/v1.0.2/graylog2-plugin-input-httpmonitor-1.0.2.jar)
 
 For Graylog v1.1 and below download this [jar] (https://github.com/sivasamyk/graylog2-plugin-input-httpmonitor/releases/download/v1.0.0/graylog2-plugin-input-httpmonitor-1.0.0.jar)
 
