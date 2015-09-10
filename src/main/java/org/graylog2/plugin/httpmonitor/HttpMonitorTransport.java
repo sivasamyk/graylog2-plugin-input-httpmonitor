@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.ProxyServer;
 import com.ning.http.client.Realm;
 import com.ning.http.client.Response;
 import org.apache.commons.lang3.StringUtils;
@@ -27,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.ConnectException;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,6 +53,7 @@ public class HttpMonitorTransport implements Transport {
     private static final String CK_CONFIG_INTERVAL_UNIT = "configIntervalUnit";
     private static final String CK_CONFIG_HEADERS_TO_RECORD = "configHeadersToRecord";
     private static final String CK_CONFIG_LOG_RESPONSE_BODY = "configLogResponseBody";
+    private static final String CK_CONFIG_HTTP_PROXY = "configHttpProxy";
 
     private static final String METHOD_POST = "POST";
     private static final String METHOD_HEAD = "HEAD";
@@ -85,6 +88,11 @@ public class HttpMonitorTransport implements Transport {
         urlMonitorConfig.setUrl(configuration.getString(CK_CONFIG_URL));
         urlMonitorConfig.setLabel(configuration.getString(CK_CONFIG_LABEL));
         urlMonitorConfig.setMethod(configuration.getString(CK_CONFIG_METHOD));
+
+        String proxyUri = configuration.getString(CK_CONFIG_HTTP_PROXY);
+        if (proxyUri != null && !proxyUri.isEmpty()) {
+            urlMonitorConfig.setHttpProxyUri(URI.create(proxyUri));
+        }
 
         String requestHeaders = configuration.getString(CK_CONFIG_HEADERS_TO_SEND);
         if (StringUtils.isNotEmpty(requestHeaders)) {
@@ -263,18 +271,25 @@ public class HttpMonitorTransport implements Transport {
                 requestBuilder.setRealm(realm);
             }
 
-            int timeoutInMs = (int)TimeUnit.MILLISECONDS.convert(config.getTimeout(),config.getTimeoutUnit());
+            int timeoutInMs = (int) TimeUnit.MILLISECONDS.convert(config.getTimeout(), config.getTimeoutUnit());
             requestBuilder.setRequestTimeout(timeoutInMs);
+
+            if (config.getHttpProxyUri() != null) {
+                ProxyServer proxyServer = new ProxyServer(config.getHttpProxyUri().getHost(), config.getHttpProxyUri().getPort());
+                requestBuilder.setProxyServer(proxyServer);
+            }
         }
     }
 
     @FactoryClass
     public interface Factory extends Transport.Factory<HttpMonitorTransport> {
+
         @Override
         HttpMonitorTransport create(Configuration configuration);
 
         @Override
         Config getConfig();
+
     }
 
     @ConfigClass
@@ -360,6 +375,13 @@ public class HttpMonitorTransport implements Transport {
                     timeUnits,
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
+
+
+            cr.addField(new TextField(CK_CONFIG_HTTP_PROXY,
+                    "HTTP Proxy URI",
+                    "",
+                    "URI of HTTP Proxy to be used if required e.g. http://myproxy:8888",
+                    ConfigurationField.Optional.OPTIONAL));
 
 
             cr.addField(new TextField(CK_CONFIG_HEADERS_TO_RECORD,

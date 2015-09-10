@@ -1,5 +1,6 @@
 package org.graylog2.plugin.httpmonitor;
 
+import java.net.URI;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -15,6 +16,16 @@ public class URLMonitorConfig {
     private String[] responseHeadersToRecord;
     private boolean logResponseBody;
     private TimeUnit intervalUnit,timeoutUnit;
+
+    public URI getHttpProxyUri() {
+        return httpProxyUri;
+    }
+
+    public void setHttpProxyUri(URI httpProxyUri) {
+        this.httpProxyUri = httpProxyUri;
+    }
+
+    private URI httpProxyUri;
 
     public String getUrl() {
         return url;
