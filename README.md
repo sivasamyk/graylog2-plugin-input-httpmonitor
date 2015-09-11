@@ -1,7 +1,7 @@
 # Graylog HTTP Monitor Input Plugin
 
 An input monitor plugin for monitoring HTTP URLs (websites and REST APIs). 
-Works by periodically polling the URLs and recording the responses as messages. 
+Works by periodically polling the URLs and recording the responses as messages.
 
 This plugin provides support for monitoring following parameters
 
@@ -35,6 +35,7 @@ Following parameters can be configured while launching the plugin
 * Additional HTTP headers to send - Comma separated list of HTTP request headers to be sent as part of request. e.g. CAccept:application/json, X-Requester:Graylog2
 * Additional HTTP headers to log - Command separated list of HTTP response headers to log as part of message. e.g. Expires,Date
 * HTTP Basic Authentication username and password
+* HTTP Proxy URI
 
 The status code will be 999 on connection failures, 998 on connection timeouts and 997 for others errors. 
 
