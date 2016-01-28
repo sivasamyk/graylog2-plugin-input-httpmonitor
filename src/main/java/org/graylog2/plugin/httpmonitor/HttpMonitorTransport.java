@@ -6,10 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.ProxyServer;
-import com.ning.http.client.Realm;
-import com.ning.http.client.Response;
+import com.ning.http.client.*;
 import org.apache.commons.lang3.StringUtils;
 import org.graylog2.plugin.ServerStatus;
 import org.graylog2.plugin.configuration.Configuration;
@@ -25,11 +22,18 @@ import org.graylog2.plugin.journal.RawMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.URL;
+import java.security.GeneralSecurityException;
+import java.security.KeyManagementException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
@@ -165,8 +169,39 @@ public class HttpMonitorTransport implements Transport {
             this.config = config;
             this.messageInput = messageInput;
             this.mapper = new ObjectMapper();
-            httpClient = new AsyncHttpClient();
+            httpClient = new AsyncHttpClient(new AsyncHttpClientConfig.Builder()
+                    .setSSLContext(getSSLContext()).build());
             buildRequest();
+        }
+
+        //Accept all certficates
+        private SSLContext getSSLContext() {
+            try {
+                SSLContext context = SSLContext.getInstance("SSL");
+                context.init(null, new TrustManager[]{
+                        new X509TrustManager() {
+
+                            @Override
+                            public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+
+                            }
+
+                            @Override
+                            public void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+
+                            }
+
+                            @Override
+                            public X509Certificate[] getAcceptedIssuers() {
+                                return null;
+                            }
+                        }
+                }, null);
+                return context;
+            } catch (GeneralSecurityException e) {
+                LOGGER.debug("Exception while creating certs ",e);
+            }
+            return null;
         }
 
         @Override
