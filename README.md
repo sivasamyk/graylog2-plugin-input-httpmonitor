@@ -1,5 +1,7 @@
 # Graylog HTTP Monitor Input Plugin
 
+[![Build Status](https://travis-ci.org/sivasamyk/graylog2-plugin-input-httpmonitor.svg?branch=master)](https://travis-ci.org/sivasamyk/graylog2-plugin-input-httpmonitor)
+
 An input monitor plugin for monitoring HTTP URLs (websites and REST APIs). 
 Works by periodically polling the URLs and recording the responses as messages.
 
