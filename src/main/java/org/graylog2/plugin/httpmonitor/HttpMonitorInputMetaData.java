@@ -34,7 +34,7 @@ public class HttpMonitorInputMetaData implements PluginMetaData {
 
     @Override
     public Version getVersion() {
-        return new Version(1, 0, 2);
+        return new Version(1, 0, 4);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class HttpMonitorInputMetaData implements PluginMetaData {
 
     @Override
     public Version getRequiredVersion() {
-        return new Version(1, 2, 0);
+        return new Version(2, 0, 0);
     }
 
     @Override
