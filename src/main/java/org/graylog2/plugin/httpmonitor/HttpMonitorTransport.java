@@ -169,8 +169,10 @@ public class HttpMonitorTransport implements Transport {
             this.config = config;
             this.messageInput = messageInput;
             this.mapper = new ObjectMapper();
-            httpClient = new AsyncHttpClient(new AsyncHttpClientConfig.Builder()
-                    .setSSLContext(getSSLContext()).build());
+            AsyncHttpClientConfig.Builder configBuilder = new AsyncHttpClientConfig.Builder();
+            configBuilder.setEnabledProtocols(new String[] {"TLSv1.2", "TLSv1.1", "TLSv1"});
+            configBuilder.setSSLContext(getSSLContext());
+            httpClient = new AsyncHttpClient(configBuilder.build());
             buildRequest();
         }
 
@@ -432,5 +434,13 @@ public class HttpMonitorTransport implements Transport {
 
             return cr;
         }
+    }
+
+    public static void main(String args[]) {
+        URLMonitorConfig config = new URLMonitorConfig();
+        config.setUrl("https://www.skipper18.com");
+        config.setMethod("GET");
+        MonitorTask monitorTask = new MonitorTask(config,null);
+        monitorTask.run();
     }
 }

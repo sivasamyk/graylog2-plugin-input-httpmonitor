@@ -13,11 +13,13 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.graylog2:graylog2-plugin:1.0.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.google.guava:guava:18.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.google.inject.extensions:guice-assistedinject:3.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.google.inject:guice:3.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: javax.inject:javax.inject:1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: aopalliance:aopalliance:1.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: joda-time:joda-time:2.6" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: io.dropwizard.metrics:metrics-core:3.1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.9" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.lmax:disruptor:3.3.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.google.inject:guice:3.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: aopalliance:aopalliance:1.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.google.inject.extensions:guice-multibindings:3.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.fasterxml.jackson.core:jackson-core:2.5.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.5.0" level="project" />
@@ -34,15 +36,15 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.glassfish.hk2:hk2-api:2.4.0-b06" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.glassfish.hk2:hk2-utils:2.4.0-b06" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.glassfish.hk2.external:aopalliance-repackaged:2.4.0-b06" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.glassfish.hk2.external:javax.inject:2.4.0-b06" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.glassfish.hk2:hk2-locator:2.4.0-b06" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.glassfish.hk2:osgi-resource-locator:1.0.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.kie:kie-api:6.1.0.Final" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: commons-io:commons-io:2.4" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.eaio.uuid:uuid:3.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.joschi:jadconfig:0.10.0" level="project" />
-    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.9" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.google.code.findbugs:jsr305:3.0.0" level="project" />
-    <orderEntry type="library" name="Maven: com.ning:async-http-client:1.8.14" level="project" />
+    <orderEntry type="library" name="Maven: com.ning:async-http-client:1.9.29" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.graylog2:graylog2-inputs:1.0.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.stephenc.high-scale-lib:high-scale-lib:1.1.4" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.rabbitmq:amqp-client:3.4.2" level="project" />
@@ -61,7 +63,6 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: net.minidev:json-smart:2.1.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: net.minidev:asm:1.0.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: asm:asm:3.3.1" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: javax.inject:javax.inject:1" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.glassfish.hk2.external:javax.inject:2.4.0-b06" level="project" />
   </component>
 </module>
+
