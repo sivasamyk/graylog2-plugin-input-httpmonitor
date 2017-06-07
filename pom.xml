@@ -6,7 +6,7 @@
 
     <groupId>org.graylog2</groupId>
     <artifactId>graylog2-plugin-input-httpmonitor</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
@@ -31,7 +31,7 @@
         <dependency>
             <groupId>com.ning</groupId>
             <artifactId>async-http-client</artifactId>
-            <version>1.9.29</version>
+            <version>1.9.40</version>
         </dependency>
         <dependency>
             <groupId>org.graylog2</groupId>
