@@ -50,4 +50,4 @@ You can import the [content pack](https://github.com/sivasamyk/graylog-contentpa
 Sample Dashboard
 ----------------
 
-![Dashboard for Hacker News Monitor] (https://raw.githubusercontent.com/sivasamyk/graylog2-plugin-input-httpmonitor/master/HTTP%20Monitor%20Screenshot.png)
+![Dashboard for Hacker News Monitor](https://raw.githubusercontent.com/sivasamyk/graylog2-plugin-input-httpmonitor/master/HTTP%20Monitor%20Screenshot.png)
