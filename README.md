@@ -1,6 +1,6 @@
-# Graylog HTTP Monitor Input Plugin
+# Graylog HTTP Monitor Input Plugin (DEPRECATED)
 
-[![Build Status](https://travis-ci.org/sivasamyk/graylog2-plugin-input-httpmonitor.svg?branch=master)](https://travis-ci.org/sivasamyk/graylog2-plugin-input-httpmonitor)
+![maintenance-status](https://img.shields.io/badge/maintenance-deprecated-red.svg)
 
 An input monitor plugin for monitoring HTTP URLs (websites and REST APIs). 
 Works by periodically polling the URLs and recording the responses as messages.
